@@ -172,9 +172,9 @@
 					512x384 {
 						hactive = <512>;
 						vactive = <384>;
-						hback-porch = <1>;
+						hback-porch = <20>;
 						hfront-porch = <2>;
-						hsync-len = <150>;
+						hsync-len = <100>;
 						vback-porch = <20>;
 						vfront-porch = <10>;
 						vsync-len = <4>; // in frames
