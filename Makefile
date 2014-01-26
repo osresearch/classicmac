@@ -3,6 +3,7 @@
 # The top level targets link in the two .o files for now.
 #
 TARGETS += macvideo
+TARGETS += x11mac
 LEDSCAPE_DIR ?= ../LEDscape
 
 all: $(TARGETS) macvideo.bin
