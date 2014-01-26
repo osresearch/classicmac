@@ -26,9 +26,17 @@ fb_copy(
 {
 	const XWDColor * const xfb_colors
 		= ((const XWDColor*) xfb) + be32toh(xfb->header_size);
+/*
 	const uint8_t * const xfb_data
 		= (const uint8_t*)(xfb_colors + be32toh(xfb->ncolors));
+*/
+	const uint8_t * const xfb_data
+		= ((const uint8_t*)xfb_colors) + be32toh(xfb->ncolors);
 	const size_t line_size = be32toh(xfb->bytes_per_line);
+
+	static int first;
+	if (first++ == 0)
+		printf("offset %zx\n", xfb_data - (const uint8_t*) xfb);
 
 	//memset(fb, 0, VRAM_WIDTH*VRAM_HEIGHT/8);
 
