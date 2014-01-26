@@ -54,7 +54,16 @@
 
 #define NOP ADD r0, r0, 0
 
-/** Wait for the cycle counter to reach a given value */
+/** Wait for the cycle counter to reach a given value; we might
+ * overshoot by a bit so we ensure that we always have the same
+ * amount of overshoot.
+ *
+ * wake_time += ns;
+ * while (now = read_timer()) < wake_time)
+ *	;
+ * if (now - wake_time < 1)
+ *      nop()
+ */
 #define WAITNS(ns,lab) \
 	MOV tmp1, (ns)/5; \
 	ADD sleep_counter, sleep_counter, tmp1; \
@@ -62,7 +71,7 @@ lab: ; \
 	LBBO tmp2, timer_ptr, 0xC, 4; /* read the cycle counter */ \
 	QBGT lab, tmp2, sleep_counter; \
 	SUB tmp2, tmp2, sleep_counter; \
-	QBBC lab##_2, tmp2, 0; \
+	QBLT lab##_2, tmp2, 1; \
 	NOP; \
 lab##_2: ; \
 
@@ -169,7 +178,13 @@ READ_LOOP:
 
 
 #define OUTPUT_COLUMN(rN) \
+		QBBC clr_##rN, rN, col; \
+			VIDEO_LO; \
+			QBA skip_##rN; \
 	col_##rN: ; \
+		NOP; \
+		NOP; \
+		NOP; NOP; NOP; NOP; \
 		QBBC clr_##rN, rN, col; \
 			VIDEO_LO; \
 			QBA skip_##rN; \
@@ -177,31 +192,29 @@ READ_LOOP:
 			NOP; \
 			VIDEO_HI; \
 		skip_##rN:; \
-		NOP; \
-		NOP; \
-		NOP; NOP; NOP; NOP; \
 		ADD col, col, 1; \
 		AND col, col, 31; \
 		QBNE col_##rN, col, 0; \
+		NOP; NOP; NOP; NOP; \
 
-		OUTPUT_COLUMN(r10);
-		OUTPUT_COLUMN(r11);
-		OUTPUT_COLUMN(r12);
+		OUTPUT_COLUMN(r10); NOP; NOP;
+		OUTPUT_COLUMN(r11); NOP; NOP;
+		OUTPUT_COLUMN(r12); NOP; NOP;
 		OUTPUT_COLUMN(r13);
 		HSYNC_HI
 
-		OUTPUT_COLUMN(r14);
-		OUTPUT_COLUMN(r15);
-		OUTPUT_COLUMN(r16);
-		OUTPUT_COLUMN(r17);
-		OUTPUT_COLUMN(r18);
-		OUTPUT_COLUMN(r19);
-		OUTPUT_COLUMN(r20);
-		OUTPUT_COLUMN(r21);
-		OUTPUT_COLUMN(r22);
-		OUTPUT_COLUMN(r23);
-		OUTPUT_COLUMN(r24);
-		OUTPUT_COLUMN(r25);
+		OUTPUT_COLUMN(r14); NOP; NOP;
+		OUTPUT_COLUMN(r15); NOP; NOP;
+		OUTPUT_COLUMN(r16); NOP; NOP;
+		OUTPUT_COLUMN(r17); NOP; NOP;
+		OUTPUT_COLUMN(r18); NOP; NOP;
+		OUTPUT_COLUMN(r19); NOP; NOP;
+		OUTPUT_COLUMN(r20); NOP; NOP;
+		OUTPUT_COLUMN(r21); NOP; NOP;
+		OUTPUT_COLUMN(r22); NOP; NOP;
+		OUTPUT_COLUMN(r23); NOP; NOP;
+		OUTPUT_COLUMN(r24); NOP; NOP;
+		OUTPUT_COLUMN(r25); NOP; NOP;
 
 		// Always return the video pin to a high state
 		VIDEO_HI
