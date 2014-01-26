@@ -61,6 +61,10 @@
 lab: ; \
 	LBBO tmp2, timer_ptr, 0xC, 4; /* read the cycle counter */ \
 	QBGT lab, tmp2, sleep_counter; \
+	SUB tmp2, tmp2, sleep_counter; \
+	QBBC lab##_2, tmp2, 0; \
+	NOP; \
+lab##_2: ; \
 
 
 
@@ -156,7 +160,6 @@ READ_LOOP:
 	ROW_LOOP:
 		HSYNC_LO
 
-
 		// Load the sixteen pixels worth of data outputs into
 		// This takes about 250 ns
 		LBBO pixel_data, data_addr, 0, 512/8
@@ -216,9 +219,10 @@ READ_LOOP:
 
 		// Be sure that we wait for the right length of time
 		// Force each line to be 50 usec
-		WAITNS(33500, wait_hsync_end)
+		WAITNS(34000, wait_hsync_end)
 
                 QBNE ROW_LOOP, row, 0
+		WAITNS(5000, wait_hsync_end2)
 	QBA READ_LOOP
 	
 EXIT:
