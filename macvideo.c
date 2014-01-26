@@ -61,7 +61,7 @@ int main(void)
 
 	memset(vram, 0x00, VRAM_WIDTH*VRAM_HEIGHT/8);
 
-#if 0
+#if 1
 	for (int y = 0 ; y < VRAM_HEIGHT ; y++)
 	{
 		for (int x = 0 ; x < VRAM_WIDTH ; x++)
@@ -122,6 +122,7 @@ int main(void)
 	while (1)
 	{
 		*pru_cmd = pru->ddr_addr;
+		usleep(1000);
 	}
 
 	return 0;

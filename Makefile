@@ -7,7 +7,6 @@ LEDSCAPE_DIR ?= ../LEDscape
 
 all: $(TARGETS) macvideo.bin
 
-
 ifeq ($(shell uname -m),armv7l)
 # We are on the BeagleBone Black itself;
 # do not cross compile.
@@ -68,14 +67,18 @@ PASM_DIR ?= $(LEDSCAPE_DIR)/am335x/pasm
 PASM := $(PASM_DIR)/pasm
 
 %.bin: %.p $(PASM)
-	$(CPP) - < $< | perl -p -e 's/^#.*//; s/;/\n/g; s/BYTE\((\d+)\)/t\1/g' > $<.i
+	$(CPP) \
+		-I$(LEDSCAPE_DIR)/ \
+		- \
+		< $< \
+	| perl -p -e 's/^#.*//; s/;/\n/g; s/BYTE\((\d+)\)/t\1/g' > $<.i
 	$(PASM) -V3 -b $<.i $(basename $@)
 	$(RM) $<.i
 
 %.o: %.c
 	$(COMPILE.o)
 
-$(foreach O,$(TARGETS),$(eval $O: $O.o $(APP_LOADER_LIB)))
+$(foreach O,$(TARGETS),$(eval $O: $O.o $(LEDSCAPE_DIR)/pru.o $(APP_LOADER_LIB)))
 
 $(TARGETS):
 	$(COMPILE.link)

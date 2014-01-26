@@ -33,9 +33,10 @@
 #define vsync_pin r5
 #define gpio0_base r6
 #define sleep_counter r7 // how long to wait
-#define tmp1 r8
-#define tmp2 r9
+#define timer_ptr r8
 #define pixel_data r10 // the next 16 registers, too
+#define tmp1 r28
+#define tmp2 r29
 
 /** GPIO0 pin numbers for our outputs */
 #define VIDEO_PIN 23
@@ -51,13 +52,14 @@
 #define VIDEO_LO SBBO video_pin, gpio0_base, GPIO_CLRDATAOUT, 4
 #define VIDEO_HI SBBO video_pin, gpio0_base, GPIO_SETDATAOUT, 4
 
+#define NOP ADD r0, r0, 0
+
 /** Wait for the cycle counter to reach a given value */
 #define WAITNS(ns,lab) \
 	MOV tmp1, (ns)/5; \
 	ADD sleep_counter, sleep_counter, tmp1; \
-	MOV tmp1, 0x22000 /* control register */; \
 lab: ; \
-	LBBO tmp2, tmp1, 0xC, 4; /* read the cycle counter */ \
+	LBBO tmp2, timer_ptr, 0xC, 4; /* read the cycle counter */ \
 	QBGT lab, tmp2, sleep_counter; \
 
 
@@ -89,6 +91,8 @@ START:
     MOV r2, #0x1
     SBCO r2, CONST_PRUDRAM, 12, 4
 
+    MOV timer_ptr, 0x22000 /* control register */
+
     // Configure our output pins
     MOV gpio0_base, GPIO0
     MOV video_pin, 1 << VIDEO_PIN
@@ -118,20 +122,19 @@ READ_LOOP:
 
 	// Disable the counter and clear it, then re-enable it
 	// This starts our clock at the start of the row.
-	MOV tmp1, 0x22000 // control register
-	LBBO tmp2, tmp1, 0, 4
+	LBBO tmp2, timer_ptr, 0, 4
 	CLR tmp2, tmp2, 3 // disable counter bit
-	SBBO tmp2, tmp1, 0, 4 // write it back
+	SBBO tmp2, timer_ptr, 0, 4 // write it back
 
 	MOV r10, 0
-	SBBO r10, tmp1, 0xC, 4 // clear the timer
+	SBBO r10, timer_ptr, 0xC, 4 // clear the timer
 
 	SET tmp2, tmp2, 3 // enable counter bit
-	SBBO tmp2, tmp1, 0, 4 // write it back
+	SBBO tmp2, timer_ptr, 0, 4 // write it back
 
 	// Read the current counter value
 	// Should be zero.
-	LBBO sleep_counter, tmp1, 0xC, 4
+	LBBO sleep_counter, timer_ptr, 0xC, 4
 
 	// the hsync keeps running at normal speed for 1.2 ms
 	// 28 frames
@@ -164,10 +167,6 @@ READ_LOOP:
 #define OUTPUT_COLUMN(rN) \
 		MOV col, 32; \
 	col_##rN: ; \
-		ADD tmp1, tmp1, tmp1; ADD tmp1, tmp1, tmp1; \
-		ADD tmp1, tmp1, tmp1; ADD tmp1, tmp1, tmp1; \
-		ADD tmp1, tmp1, tmp1; \
-		ADD tmp1, tmp1, tmp1; \
 		RSB tmp1, col, 32; \
 		SUB col, col, 1; \
 		QBBC clr_##rN, rN, tmp1; \
@@ -177,26 +176,28 @@ READ_LOOP:
 			ADD tmp1, tmp1, tmp1; \
 			VIDEO_HI; \
 		skip_##rN:; \
-		QBNE col_##rN, col, 0; \
+		NOP; NOP; \
+		NOP; NOP; NOP; NOP; \
+		QBNE col_##rN, col, 1; \
 
-		OUTPUT_COLUMN(r10)
-		OUTPUT_COLUMN(r11)
-		OUTPUT_COLUMN(r12)
-		OUTPUT_COLUMN(r13)
+		OUTPUT_COLUMN(r10); NOP
+		OUTPUT_COLUMN(r11); NOP
+		OUTPUT_COLUMN(r12); NOP
+		OUTPUT_COLUMN(r13); NOP
 		HSYNC_HI
 
-		OUTPUT_COLUMN(r14)
-		OUTPUT_COLUMN(r15)
-		OUTPUT_COLUMN(r16)
-		OUTPUT_COLUMN(r17)
-		OUTPUT_COLUMN(r18)
-		OUTPUT_COLUMN(r19)
-		OUTPUT_COLUMN(r20)
-		OUTPUT_COLUMN(r21)
-		OUTPUT_COLUMN(r22)
-		OUTPUT_COLUMN(r23)
-		OUTPUT_COLUMN(r24)
-		OUTPUT_COLUMN(r25)
+		OUTPUT_COLUMN(r14); NOP
+		OUTPUT_COLUMN(r15); NOP
+		OUTPUT_COLUMN(r16); NOP
+		OUTPUT_COLUMN(r17); NOP
+		OUTPUT_COLUMN(r18); NOP
+		OUTPUT_COLUMN(r19); NOP
+		OUTPUT_COLUMN(r20); NOP
+		OUTPUT_COLUMN(r21); NOP
+		OUTPUT_COLUMN(r22); NOP
+		OUTPUT_COLUMN(r23); NOP
+		OUTPUT_COLUMN(r24); NOP
+		OUTPUT_COLUMN(r25); NOP
 
 		// Always return the video pin to a high state
 		VIDEO_HI
@@ -214,7 +215,7 @@ READ_LOOP:
 
 		// Be sure that we wait for the right length of time
 		// Force each line to be 50 usec
-		WAITNS(32800, wait_hsync_end)
+		WAITNS(32500, wait_hsync_end)
 
                 QBNE ROW_LOOP, row, 0
 	QBA READ_LOOP
