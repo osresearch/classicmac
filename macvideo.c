@@ -62,19 +62,35 @@ int main(void)
 	memset(vram, 0x00, VRAM_WIDTH*VRAM_HEIGHT/8);
 
 #if 1
-	for (int y = 0 ; y < VRAM_HEIGHT ; y++)
+	for (int y = 0 ; y < VRAM_HEIGHT/2 ; y++)
 	{
 		for (int x = 0 ; x < VRAM_WIDTH ; x++)
 		{
 			// Make a checkerboard
-			vram_set(vram, x, y, (x^y) & 1);
+			uint8_t c = x ^ y;
+			int y2 = y;
+			while (y2 >>= 1) c >>= 1;
+
+			vram_set(vram, x, y, c & 1);
 		}
 	}
 
+	for (int y = VRAM_HEIGHT/2 ; y < VRAM_HEIGHT ; y++)
+	{
+		for (int x = 0 ; x < VRAM_WIDTH ; x++)
+		{
+			// Make a checkerboard
+			vram_set(vram, x, y, ((x^y) >> 0) & 1);
+		}
+	}
+
+#if 0
 	for (int x = 90 ; x < 200 ; x++)
 		for (int y = 90 ; y < 150 ; y++)
 			vram_set(vram, x, y, 1);
+#endif
 
+#if 0
 	for (int x = 0 ; x < VRAM_WIDTH ; x++)
 	{
 		vram_set(vram, x, 0, 1);
@@ -89,6 +105,7 @@ int main(void)
 		vram_set(vram, VRAM_WIDTH-1, y, 1);
 		vram_set(vram, VRAM_WIDTH-2, y, 1);
 	}
+#endif
 
 	__asm__ __volatile__("dmb");
 #else

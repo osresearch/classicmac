@@ -162,42 +162,43 @@ READ_LOOP:
 		LBBO pixel_data, data_addr, 0, 512/8
 
 		WAITNS(11200, wait_hsync)
+		MOV col, 0
 
 
 #define OUTPUT_COLUMN(rN) \
-		MOV col, 32; \
 	col_##rN: ; \
-		RSB tmp1, col, 32; \
-		SUB col, col, 1; \
-		QBBC clr_##rN, rN, tmp1; \
+		QBBC clr_##rN, rN, col; \
 			VIDEO_LO; \
 			QBA skip_##rN; \
 		clr_##rN:; \
-			ADD tmp1, tmp1, tmp1; \
+			NOP; \
 			VIDEO_HI; \
 		skip_##rN:; \
-		NOP; NOP; \
+		NOP; \
+		NOP; \
 		NOP; NOP; NOP; NOP; \
-		QBNE col_##rN, col, 1; \
+		ADD col, col, 1; \
+		AND col, col, 31; \
+		QBNE col_##rN, col, 0; \
 
-		OUTPUT_COLUMN(r10); NOP
-		OUTPUT_COLUMN(r11); NOP
-		OUTPUT_COLUMN(r12); NOP
-		OUTPUT_COLUMN(r13); NOP
+		OUTPUT_COLUMN(r10);
+		OUTPUT_COLUMN(r11);
+		OUTPUT_COLUMN(r12);
+		OUTPUT_COLUMN(r13);
 		HSYNC_HI
 
-		OUTPUT_COLUMN(r14); NOP
-		OUTPUT_COLUMN(r15); NOP
-		OUTPUT_COLUMN(r16); NOP
-		OUTPUT_COLUMN(r17); NOP
-		OUTPUT_COLUMN(r18); NOP
-		OUTPUT_COLUMN(r19); NOP
-		OUTPUT_COLUMN(r20); NOP
-		OUTPUT_COLUMN(r21); NOP
-		OUTPUT_COLUMN(r22); NOP
-		OUTPUT_COLUMN(r23); NOP
-		OUTPUT_COLUMN(r24); NOP
-		OUTPUT_COLUMN(r25); NOP
+		OUTPUT_COLUMN(r14);
+		OUTPUT_COLUMN(r15);
+		OUTPUT_COLUMN(r16);
+		OUTPUT_COLUMN(r17);
+		OUTPUT_COLUMN(r18);
+		OUTPUT_COLUMN(r19);
+		OUTPUT_COLUMN(r20);
+		OUTPUT_COLUMN(r21);
+		OUTPUT_COLUMN(r22);
+		OUTPUT_COLUMN(r23);
+		OUTPUT_COLUMN(r24);
+		OUTPUT_COLUMN(r25);
 
 		// Always return the video pin to a high state
 		VIDEO_HI
@@ -215,7 +216,7 @@ READ_LOOP:
 
 		// Be sure that we wait for the right length of time
 		// Force each line to be 50 usec
-		WAITNS(32500, wait_hsync_end)
+		WAITNS(33500, wait_hsync_end)
 
                 QBNE ROW_LOOP, row, 0
 	QBA READ_LOOP
