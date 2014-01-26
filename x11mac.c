@@ -17,52 +17,6 @@
 #define VRAM_WIDTH 512
 #define VRAM_HEIGHT 384
 
-/*
-static inline uint32_t
-be32toh(
-	const uint32_t x
-)
-{
-	return bswap_32(x);
-}
-
-*/
-
-void
-vram_set(
-	void * const vram_ptr,
-	int x,
-	int y,
-	int val
-)
-{
-	if (x < 0 || x >= VRAM_WIDTH)
-		die("x %d", x);
-	if (y < 0 || y >= VRAM_HEIGHT)
-		die("y %d", y);
-
-	// bits are read out MSB first
-	const uint32_t bit = 1 << (x % 32);
-	const uint8_t word = x / 32;
-	volatile uint32_t * const vram = vram_ptr;
-
-	volatile uint32_t * const p = &vram[word + y * VRAM_WIDTH/32];
-	if (val == 1)
-		*p |= bit;
-	else
-	if (val == 0)
-		*p &= ~bit;
-	else
-	if (val == -1)
-		*p ^= bit;
-	else
-		die("set(%d,%d,%d)", x, y, val);
-
-	if (0 && x < 8 && y == 0)
-		printf("%d,%d, %02x => %d %p %08x\n", x, y, bit, val, p, *p);
-
-}
-
 
 void
 fb_copy(
@@ -80,11 +34,23 @@ fb_copy(
 
 	for (int y = 0 ; y < VRAM_HEIGHT ; y++)
 	{
-		const uint8_t * const row = xfb_data + y * line_size;
-		for (int x = 0 ; x < VRAM_WIDTH ; x++)
+		const uint8_t * const xfb_row = xfb_data + y * line_size;
+		uint8_t * const fb_row = ((uint8_t*)fb) + y * VRAM_WIDTH/8;
+
+		for (int x = 0 ; x < VRAM_WIDTH ; x += 8)
 		{
-			const uint8_t p = row[x];
-			vram_set(fb, x, y, p ? 1 : 0);
+			uint8_t pix = 0;
+
+			for (int x2 = 0 ; x2 < 8 ; x2++)
+			{
+				const uint8_t p = xfb_row[x + x2];
+				if (p)
+					pix = (pix >> 1) | 0x80;
+				else
+					pix >>= 1;
+			}
+
+			fb_row[x / 8] = pix;
 		}
 	}
 }
