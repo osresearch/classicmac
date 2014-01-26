@@ -1,18 +1,14 @@
-# Object files
+.*.swp
+.*.swo
+*.i
 *.o
-*.ko
-
-# Libraries
-*.lib
 *.a
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
+*.bin
+pcb/*.b[^r][^d]
+pcb/*.p[^c][^b]
+rgb-test
+am335x/pasm/pasm
+.*.d
+*~
+*~
+a.out
