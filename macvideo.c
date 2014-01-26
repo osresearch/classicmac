@@ -8,10 +8,6 @@
 #define VRAM_WIDTH 512
 #define VRAM_HEIGHT 384
 
-const int video_pin = 23;
-const int hsync_pin = 26;
-const int vsync_pin = 27;
-
 void
 vram_set(
 	void * const vram_ptr,
@@ -55,9 +51,10 @@ int main(void)
 
 	uint32_t * const pru_cmd = pru->data_ram;
 	uint8_t * const vram = pru->ddr;
-	pru_gpio(0, video_pin, 1, 1);
-	pru_gpio(0, vsync_pin, 1, 1);
-	pru_gpio(0, hsync_pin, 1, 1);
+
+	pru_gpio(0, 22, 1, 1);
+	pru_gpio(0, 23, 1, 1);
+	pru_gpio(0, 27, 1, 1);
 
 	memset(vram, 0x00, VRAM_WIDTH*VRAM_HEIGHT/8);
 

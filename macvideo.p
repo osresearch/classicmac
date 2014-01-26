@@ -40,8 +40,8 @@
 
 /** GPIO0 pin numbers for our outputs */
 #define VIDEO_PIN 23
-#define HSYNC_PIN 26
-#define VSYNC_PIN 27
+#define HSYNC_PIN 27
+#define VSYNC_PIN 22
 
 #define VSYNC_LO SBBO vsync_pin, gpio0_base, GPIO_CLRDATAOUT, 4
 #define VSYNC_HI SBBO vsync_pin, gpio0_base, GPIO_SETDATAOUT, 4
