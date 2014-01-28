@@ -4,7 +4,12 @@
 #
 TARGETS += macvideo
 TARGETS += x11mac
+TARGETS += eventmap
 LEDSCAPE_DIR ?= ../LEDscape
+
+eventmap.LDLIBS := \
+	-lX11 \
+	-lXtst \
 
 all: $(TARGETS) macvideo.bin
 
@@ -41,9 +46,10 @@ LDFLAGS += \
 LDLIBS += \
 	-lpthread \
 
+
 COMPILE.o = $(CROSS_COMPILE)gcc $(CFLAGS) -c -o $@ $< 
 COMPILE.a = $(CROSS_COMPILE)gcc -c -o $@ $< 
-COMPILE.link = $(CROSS_COMPILE)gcc $(LDFLAGS) -o $@ $^ $(LDLIBS)
+COMPILE.link = $(CROSS_COMPILE)gcc $(LDFLAGS) -o $@ $^ $(LDLIBS) $($@.LDLIBS)
 
 
 #####
