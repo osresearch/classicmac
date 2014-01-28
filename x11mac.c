@@ -28,10 +28,11 @@ fb_copy(
 		= ((const XWDColor*) xfb) + be32toh(xfb->header_size);
 /*
 	const uint8_t * const xfb_data
-		= (const uint8_t*)(xfb_colors + be32toh(xfb->ncolors));
+		= (const uint8_t*)(xfb_colors + be32toh(xfb->ncolors)) + 0x120;
 */
+	// \todo: What is the correct offset?
 	const uint8_t * const xfb_data
-		= ((const uint8_t*)xfb_colors) + be32toh(xfb->ncolors);
+		= ((const uint8_t*)xfb_colors) + be32toh(xfb->ncolors)+0x20;
 	const size_t line_size = be32toh(xfb->bytes_per_line);
 
 	static int first;
