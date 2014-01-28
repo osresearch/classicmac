@@ -663,6 +663,23 @@
 <rectangle x1="40.005" y1="0" x2="50.165" y2="11.43" layer="39"/>
 <rectangle x1="15.875" y1="0" x2="34.29" y2="17.78" layer="39"/>
 </package>
+<package name="JST-PH-2-THM">
+<description>4UCon #01528
+http://www.4uconnector.com/online/object/4udrawing/01528.pdf</description>
+<wire x1="3" y1="-1.7" x2="0.5" y2="-1.7" width="0.127" layer="21"/>
+<wire x1="0.5" y1="-1.7" x2="0.5" y2="-2.2" width="0.127" layer="21"/>
+<wire x1="0.5" y1="-2.2" x2="-0.5" y2="-2.2" width="0.127" layer="21"/>
+<wire x1="-0.5" y1="-2.2" x2="-0.5" y2="-1.7" width="0.127" layer="21"/>
+<wire x1="-0.5" y1="-1.7" x2="-3" y2="-1.7" width="0.127" layer="21"/>
+<wire x1="-3" y1="-1.7" x2="-3" y2="2.8" width="0.127" layer="21"/>
+<wire x1="-3" y1="2.8" x2="3" y2="2.8" width="0.127" layer="21"/>
+<wire x1="3" y1="2.8" x2="3" y2="-1.7" width="0.127" layer="21"/>
+<pad name="1" x="1" y="0" drill="0.8" diameter="1.4224" rot="R180"/>
+<pad name="2" x="-1" y="0" drill="0.8" diameter="1.4224" rot="R180"/>
+<text x="-2.8" y="-3.5" size="1.27" layer="25" font="vector">&gt;NAME</text>
+<text x="4.064" y="0.762" size="1.27" layer="21" font="vector" rot="R180">+</text>
+<text x="-3.302" y="0.762" size="1.27" layer="21" font="vector" rot="R180">-</text>
+</package>
 </packages>
 </library>
 <library name="con-molex">
@@ -905,6 +922,7 @@ design rules under a new name.</description>
 <attribute name="MF" value="" x="46.99" y="54.61" size="1.27" layer="27" display="off"/>
 <attribute name="OC_FARNELL" value="unknown" x="46.99" y="54.61" size="1.27" layer="27" display="off"/>
 </element>
+<element name="CN1" library="adafruit" package="JST-PH-2-THM" value="" x="38.1" y="40.64"/>
 </elements>
 <signals>
 <signal name="GND">
@@ -928,6 +946,8 @@ design rules under a new name.</description>
 <contactref element="X1" pad="3"/>
 <contactref element="X1" pad="5"/>
 <contactref element="X1" pad="8"/>
+<contactref element="CN1" pad="1"/>
+<wire x1="21.59" y1="17.145" x2="39.1" y2="40.64" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="VDD_3V3EXP">
 <contactref element="U$1" pad="49"/>
@@ -1133,6 +1153,9 @@ design rules under a new name.</description>
 </signal>
 <signal name="VSYNC">
 <contactref element="X1" pad="11"/>
+</signal>
+<signal name="AUDIO">
+<contactref element="CN1" pad="2"/>
 </signal>
 </signals>
 </board>
