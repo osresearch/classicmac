@@ -135,11 +135,11 @@ main(
 	{
 		fb_copy(fb1, xfb);
 		*pru_cmd = fb1_ddr;
-		usleep(3000);
+		usleep(30000);
 
 		fb_copy(fb2, xfb);
 		*pru_cmd = fb2_ddr;
-		usleep(3000);
+		usleep(30000);
 	}
 
 	return 0;
