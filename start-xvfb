@@ -1,0 +1,20 @@
+#!/bin/sh
+killall Xvfb
+killall x11mac
+
+Xvfb \
+	-retro \
+	-ac \
+	-screen 0 512x384x8 \
+	-fbdir /tmp/ \
+	+extension XTEST \
+	&
+
+sleep 10
+
+export DISPLAY=:0
+
+xterm -geometry +10+10 &
+xeyes -geometry -0-0 &
+
+./x11mac /tmp/Xvfb_screen0
