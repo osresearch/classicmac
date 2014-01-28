@@ -1,5 +1,6 @@
 /** \file
  * Map /dev/input/event* to XTestEvents.
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +20,7 @@
 static Display * dpy;
 
 // table from http://lists.freedesktop.org/pipermail/xorg/2006-May/015587.html
+// arrow keys are borked; need to revisit this.
 static const int keymap[] = {
 	  0,   9,  10,  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,  21,
 22,  23,
@@ -432,4 +434,3 @@ main(
 		}
 	}
 }
-
