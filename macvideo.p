@@ -149,6 +149,9 @@ READ_LOOP:
 	// Should be zero.
 	LBBO sleep_counter, timer_ptr, 0xC, 4
 
+	// the hsync pulse starts a bit after the vsync
+	WAITNS(8000, wait_start)
+
 	// the hsync keeps running at normal speed for 1.2 ms
 	// 28 frames
 	MOV row, 29
@@ -167,6 +170,7 @@ READ_LOOP:
         MOV row, 384
 
 	ROW_LOOP:
+		// start the new row
 		HSYNC_LO
 
 		// Load the sixteen pixels worth of data outputs into
