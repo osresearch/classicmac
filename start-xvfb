@@ -1,6 +1,5 @@
 #!/bin/sh
-killall Xvfb
-killall x11mac
+killall Xvfb x11mac eventmap
 
 Xvfb \
 	-retro \
@@ -10,11 +9,12 @@ Xvfb \
 	+extension XTEST \
 	&
 
-sleep 10
+sleep 5
 
 export DISPLAY=:0
 
 xterm -geometry +10+10 &
 xeyes -geometry -0-0 &
 
-./x11mac /tmp/Xvfb_screen0
+./x11mac /tmp/Xvfb_screen0 &
+./eventmap /dev/input/event* &
