@@ -115,7 +115,7 @@ $(PASM):
 	$(MAKE) -C $(PASM_DIR)
 
 # Compile and load the device tree file
-CAPE=cape-bone-macplus
+CAPE=cape-bone-mac
 FIRMWARE=/lib/firmware/$(CAPE)-00A0.dtbo
 $(FIRMWARE): $(CAPE).dts
 	dtc -I dts -O dtb $< > $@
