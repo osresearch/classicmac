@@ -114,5 +114,14 @@ $(APP_LOADER_LIB):
 $(PASM):
 	$(MAKE) -C $(PASM_DIR)
 
+# Compile and load the device tree file
+CAPE=cape-bone-classicmac
+FIRMWARE=/lib/firmware/$(CAPE)-00A0.dtbo
+$(FIRMWARE): $(CAPE).dts
+	dtc -I dts -O dtb $< > $@
+
+firmware: $(FIRMWARE)
+	echo cape-bone-classicmac > /sys/devices/bone_capemgr.9/slots
+
 # Include all of the generated dependency files
 -include .*.o.d
