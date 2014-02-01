@@ -10,38 +10,10 @@
 		target = <0xdeadbeef>;
 
 		__overlay__ {
-
-			pinmux_bone_lcd3_cape_led_00A0_pins {
-				pinctrl-single,pins = <0x48 0x7 0x4c 0x7>;
-				linux,phandle = <0x1>;
-				phandle = <0x1>;
-			};
-
 			pinmux_bone_lcd3_cape_lcd_pins {
 				pinctrl-single,pins = <0xa0 0x8 0xa4 0x8 0xa8 0x8 0xac 0x8 0xb0 0x8 0xb4 0x8 0xb8 0x8 0xbc 0x8 0xc0 0x8 0xc4 0x8 0xc8 0x8 0xcc 0x8 0xd0 0x8 0xd4 0x8 0xd8 0x8 0xdc 0x8 0xe0 0x0 0xe4 0x0 0xe8 0x0 0xec 0x7>;
 				linux,phandle = <0x3>;
 				phandle = <0x3>;
-			};
-
-			pinmux_bone_lcd3_cape_keys_00A0_pins {
-				pinctrl-single,pins = <0x40 0x2f 0x44 0x2f 0x1a4 0x2f 0x78 0x2f 0x164 0x2f>;
-				linux,phandle = <0x2>;
-				phandle = <0x2>;
-			};
-		};
-	};
-
-	fragment@1 {
-		target = <0xdeadbeef>;
-
-		__overlay__ {
-
-			backlight {
-				compatible = "tps65217-backlight";
-				isel = <0x1>;
-				fdim = <0xc8>;
-				brightness = <0x64>;
-				tps = <0xdeadbeef>;
 			};
 		};
 	};
@@ -52,98 +24,6 @@
 		__overlay__ {
 			#address-cells = <0x1>;
 			#size-cells = <0x1>;
-
-			tscadc {
-				compatible = "ti,ti-tscadc";
-				reg = <0x44e0d000 0x1000>;
-				interrupt-parent = <0xdeadbeef>;
-				interrupts = <0x10>;
-				ti,hwmods = "adc_tsc";
-				status = "okay";
-
-				tsc {
-					ti,wires = <0x4>;
-					ti,x-plate-resistance = <0xc8>;
-					ti,coordinate-readouts = <0x5>;
-					ti,wire-config = <0x0 0x11 0x22 0x33>;
-				};
-
-				adc {
-					ti,adc-channels = <0x4 0x5 0x6 0x7>;
-				};
-			};
-
-			gpio-leds-cape-lcd3 {
-				compatible = "gpio-leds";
-				pinctrl-names = "default";
-				pinctrl-0 = <0x1>;
-
-				lcd3-led0 {
-					label = "lcd3:green:usr0";
-					gpios = <0xdeadbeef 0x12 0x0>;
-					linux,default-trigger = "heartbeat";
-					default-state = "off";
-				};
-
-				lcd3-led1 {
-					label = "lcd3:green:usr1";
-					gpios = <0xdeadbeef 0x13 0x0>;
-					linux,default-trigger = "cpu0";
-					default-state = "off";
-				};
-			};
-
-			gpio_keys {
-				compatible = "gpio-keys";
-				pinctrl-names = "default";
-				pinctrl-0 = <0x2>;
-				#address-cells = <0x1>;
-				#size-cells = <0x0>;
-
-				button@1 {
-					debounce_interval = <0x32>;
-					linux,code = <0x69>;
-					label = "left";
-					gpios = <0xdeadbeef 0x10 0x1>;
-					gpio-key,wakeup;
-					autorepeat;
-				};
-
-				button@2 {
-					debounce_interval = <0x32>;
-					linux,code = <0x6a>;
-					label = "right";
-					gpios = <0xdeadbeef 0x11 0x1>;
-					gpio-key,wakeup;
-					autorepeat;
-				};
-
-				button@3 {
-					debounce_interval = <0x32>;
-					linux,code = <0x67>;
-					label = "up";
-					gpios = <0xdeadbeef 0x13 0x1>;
-					gpio-key,wakeup;
-					autorepeat;
-				};
-
-				button@4 {
-					debounce_interval = <0x32>;
-					linux,code = <0x6c>;
-					label = "down";
-					gpios = <0xdeadbeef 0x1c 0x1>;
-					gpio-key,wakeup;
-					autorepeat;
-				};
-
-				button@5 {
-					debounce_interval = <0x32>;
-					linux,code = <0x1c>;
-					label = "enter";
-					gpios = <0xdeadbeef 0x7 0x1>;
-					gpio-key,wakeup;
-				};
-			};
 
 			panel {
 				compatible = "tilcdc,panel";
@@ -172,9 +52,9 @@
 					512x384 {
 						hactive = <512>;
 						vactive = <384>;
-						hback-porch = <20>;
+						hback-porch = <1>;
 						hfront-porch = <2>;
-						hsync-len = <100>;
+						hsync-len = <150>;
 						vback-porch = <20>;
 						vfront-porch = <10>;
 						vsync-len = <4>; // in frames
@@ -199,24 +79,18 @@
 	};
 
 	__symbols__ {
-		bone_lcd3_cape_led_00A0_pins = "/fragment@0/__overlay__/pinmux_bone_lcd3_cape_led_00A0_pins";
 		bone_lcd3_cape_lcd_pins = "/fragment@0/__overlay__/pinmux_bone_lcd3_cape_lcd_pins";
-		bone_lcd3_cape_keys_00A0_pins = "/fragment@0/__overlay__/pinmux_bone_lcd3_cape_keys_00A0_pins";
 		timing0 = "/fragment@2/__overlay__/panel/display-timings/512x384";
 	};
 
 	__fixups__ {
 		am33xx_pinmux = "/fragment@0:target:0";
-		tps = "/fragment@1:target:0", "/fragment@1/__overlay__/backlight:tps:0";
 		ocp = "/fragment@2:target:0";
-		intc = "/fragment@2/__overlay__/tscadc:interrupt-parent:0", "/fragment@2/__overlay__/fb:interrupt-parent:0";
-		gpio2 = "/fragment@2/__overlay__/gpio-leds-cape-lcd3/lcd3-led0:gpios:0", "/fragment@2/__overlay__/gpio-leds-cape-lcd3/lcd3-led1:gpios:0", "/fragment@2/__overlay__/gpio_keys/button@1:gpios:0", "/fragment@2/__overlay__/gpio_keys/button@2:gpios:0", "/fragment@2/__overlay__/gpio_keys/button@4:gpios:0";
-		gpio4 = "/fragment@2/__overlay__/gpio_keys/button@3:gpios:0";
-		gpio1 = "/fragment@2/__overlay__/gpio_keys/button@5:gpios:0";
+		intc = "/fragment@2/__overlay__/fb:interrupt-parent:0";
 		gpio3 = "/fragment@2/__overlay__/fb:ti,power-gpio:0";
 	};
 
 	__local_fixups__ {
-		fixup = "/fragment@2/__overlay__/gpio-leds-cape-lcd3:pinctrl-0:0", "/fragment@2/__overlay__/gpio_keys:pinctrl-0:0", "/fragment@2/__overlay__/panel:pinctrl-0:0", "/fragment@2/__overlay__/panel/display-timings:native-mode:0";
+		fixup = "/fragment@2/__overlay__/panel:pinctrl-0:0", "/fragment@2/__overlay__/panel/display-timings:native-mode:0";
 	};
 };

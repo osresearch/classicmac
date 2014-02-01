@@ -117,8 +117,12 @@ $(PASM):
 # Compile and load the device tree file
 CAPE=cape-bone-mac
 FIRMWARE=/lib/firmware/$(CAPE)-00A0.dtbo
-$(FIRMWARE): $(CAPE).dts
-	dtc -I dts -O dtb $< > $@
+#$(FIRMWARE): $(CAPE).dts
+#	dtc -I dts -O dtb $< > $@
+$(FIRMWARE): FORCE
+	dtc -I dts -O dtb $(CAPE).dts > $@
+
+FORCE:
 
 firmware: $(FIRMWARE)
 	echo $(CAPE) > /sys/devices/bone_capemgr.9/slots
