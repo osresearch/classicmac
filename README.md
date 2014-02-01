@@ -17,3 +17,13 @@ And start the mouse/keyboard event to X11 event translation:
 
 Problems?  hudson@trmm.net
 
+
+When HSYNC is low, force VIDEO high.
+
+H V
+0 0 1
+0 1 1
+1 0 1
+1 1 0
+
+!(HV)

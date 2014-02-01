@@ -173,9 +173,9 @@
 						hactive = <512>;
 						vactive = <384>;
 						hback-porch = <1>;
-						hfront-porch = <10>;
-						hsync-len = <180>;
-						vback-porch = <10>;
+						hfront-porch = <2>;
+						hsync-len = <150>;
+						vback-porch = <20>;
 						vfront-porch = <10>;
 						vsync-len = <4>; // in frames
 						clock-frequency = <16000000>;
