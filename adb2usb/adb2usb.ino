@@ -67,8 +67,8 @@ adb_drive(int value)
 		ADB_PORT |=  (1 << ADB_PIN);
 	} else {
 		// drive low
-		ADB_PORT &= ~(1 << ADB_PIN);
 		ADB_DDR  |=  (1 << ADB_PIN);
+		ADB_PORT &= ~(1 << ADB_PIN);
 	}
 }
 
@@ -114,6 +114,13 @@ adb_send_byte(
 }
 
 
+static inline volatile uint8_t
+adb_input(void)
+{
+	return (ADB_INPUT & (1 << ADB_PIN)) ? 1 : 0;
+}
+
+
 static uint8_t
 adb_send(
 	uint8_t byte
@@ -148,44 +155,33 @@ adb_send(
 }
 
 
-static inline uint8_t
-adb_input(void)
-{
-	return (ADB_INPUT & (1 << ADB_PIN)) ? 1 : 0;
-}
-
 
 static uint8_t
 adb_read_byte(void)
 {
 	uint8_t byte = 0;
-	trigger_state(1);
-	delayMicroseconds(50);
-	trigger_state(0);
-	delayMicroseconds(50);
 
 	for (uint8_t i = 0 ; i < 8 ; i++)
 	{
-		// wait 50 usec, sample
-		trigger_state(1);
-		delayMicroseconds(50);
-		const uint8_t bit = adb_input();
-		trigger_state(0);
-		byte = (byte << 1) | bit;
-
-#if 0
-		// wait for next rising edge
-		while(adb_input() == 0)
+		// wait for falling edge; need timeout/watchdog
+		while (adb_input())
 			;
 
-		if (i != 8)
-			while (adb_input() == 1)
-				;
-#else
-		delayMicroseconds(50);
-#endif
+		// wait 50 usec, sample
+		trigger_state(0);
+		delayMicroseconds(55);
+		const uint8_t bit = adb_input();
+		byte = (byte << 1) | bit;
+
+		trigger_state(1);
+
+		// make sure we are back into the high-period
+		delayMicroseconds(15);
+		while (adb_input() == 0)
+			;
 	}
 
+	trigger_state(0);
 	return byte;
 }
 
@@ -215,6 +211,11 @@ adb_read(
 
 start_bit:
 	led_state(1);
+
+	// get the start bit
+	trigger_state(1);
+	delayMicroseconds(90);
+
 	for (uint8_t i = 0 ; i < len ; i++)
 		buf[i] = adb_read_byte();
 
@@ -259,6 +260,15 @@ void setup(void)
 }
 
 
+static void
+print_u8(
+	uint8_t x
+)
+{
+	Serial.print((x >> 4) & 0xF, HEX);
+	Serial.print((x >> 0) & 0xF, HEX);
+}
+
 
 void loop(void)
 {
@@ -274,8 +284,9 @@ void loop(void)
 
 		Serial.print(i);
 		Serial.print(' ');
-		Serial.print(buf[0], HEX);
-		Serial.println(buf[1], HEX);
+		print_u8(buf[0]);
+		print_u8(buf[1]);
+		Serial.println();
 
 /*
 		while (Serial.available() == 0)
