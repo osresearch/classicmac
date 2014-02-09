@@ -261,6 +261,9 @@ adb_reset(void)
 
 void setup(void)
 {
+	Keyboard.begin();
+	Mouse.begin();
+
 	led_init();
 	trigger_init();
 
@@ -304,6 +307,18 @@ void loop(void)
 		Serial.print("K:");
 		print_u8(buf[0]);
 		print_u8(buf[1]);
+
+		Serial.print(' ');
+		print_u8(buf[0] & 0x7F);
+		Serial.print(buf[0] & 0x80 ? '+' : '-');
+
+		if (buf[1] != 0xFF)
+		{
+			Serial.print(' ');
+			print_u8(buf[1] & 0x7F);
+			Serial.print(buf[1] & 0x80 ? '+' : '-');
+		}
+
 		Serial.println();
 	}
 	delayMicroseconds(3000);
