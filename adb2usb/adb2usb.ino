@@ -7,7 +7,7 @@
  * 2   1
  *   -
  *
- * 1: ADB Data (black)
+ * 1: ADB Data (black), connect with 10K pullup to +5V
  * 2: PSW (brown)
  * 3: +5V (red)
  * 4: GND (orange)
@@ -15,6 +15,8 @@
  * Useful documentation:
  * https://developer.apple.com/legacy/library/technotes/hw/hw_01.html
  */
+
+#include "keymap.h"
 
 #define ADB_PORT PORTD
 #define ADB_DDR DDRD
@@ -308,15 +310,40 @@ void loop(void)
 		print_u8(buf[0]);
 		print_u8(buf[1]);
 
+		const uint8_t k0 = buf[0] & 0x7F;
+		const uint8_t r0 = buf[0] & 0x80;
+
 		Serial.print(' ');
-		print_u8(buf[0] & 0x7F);
-		Serial.print(buf[0] & 0x80 ? '+' : '-');
+		print_u8(k0);
+		Serial.print(r0 ? '+' : '-');
+
+		uint8_t kc0 = keymap[k0];
+		if (!kc0)
+			Serial.print('?');
+		else
+		if (r0)
+			Keyboard.release(kc0);
+		else
+			Keyboard.press(kc0);
+
 
 		if (buf[1] != 0xFF)
 		{
+			const uint8_t k1 = buf[1] & 0x7F;
+			const uint8_t r1 = buf[1] & 0x80;
+
 			Serial.print(' ');
-			print_u8(buf[1] & 0x7F);
-			Serial.print(buf[1] & 0x80 ? '+' : '-');
+			print_u8(k1);
+			Serial.print(r1 ? '+' : '-');
+
+			const uint8_t kc1 = keymap[k1];
+			if (!kc1)
+				Serial.print("?");
+			else
+			if (r1)
+				Keyboard.release(kc1);
+			else
+				Keyboard.press(kc1);
 		}
 
 		Serial.println();
@@ -354,6 +381,21 @@ void loop(void)
 		Serial.print(m1);
 		Serial.print(m2);
 		Serial.println();
+
+		Mouse.move(dy * 4, dx * 4);
+
+		static uint8_t m1_held;
+
+		if (m1 && !m1_held)
+		{
+			Mouse.press(MOUSE_LEFT);
+			m1_held = 1;
+		} else
+		if (!m1 && m1_held)
+		{
+			Mouse.release(MOUSE_LEFT);
+			m1_held = 0;
+		}
 	}
 
 	delayMicroseconds(3000);

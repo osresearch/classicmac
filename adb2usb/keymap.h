@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 extern uint8_t keymap[];
 
 // Keyboard modifiers from http://arduino.cc/en/Reference/KeyboardModifiers
