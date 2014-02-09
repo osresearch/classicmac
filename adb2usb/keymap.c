@@ -1,8 +1,9 @@
 #include <stdint.h>
 #include "keymap.h"
+#include <keylayouts.h>
 
 
-uint8_t keymap[] = {
+const uint16_t keymap[] = {
 	[0x35] = KEY_ESC,
 	[0x12] = '1',
 	[0x13] = '2',
@@ -13,6 +14,7 @@ uint8_t keymap[] = {
 	[0x1a] = '7',
 	[0x1c] = '8',
 	[0x19] = '9',
+	[0x1d] = '0',
 	[0x1b] = '-',
 	[0x18] = '=',
 	[0x33] = KEY_BACKSPACE,
@@ -34,13 +36,13 @@ uint8_t keymap[] = {
 	[0x23] = 'p',
 	[0x21] = '[',
 	[0x1e] = ']',
-	[0x24] = KEY_RETURN,
+	[0x24] = '\n',
 	[0x59] = 231, // 'np7',
 	[0x5b] = 232, // 'np8',
 	[0x5c] = 233, // 'np9',
 	[0x45] = 223, // 'np+',
 
-	[0x36] = KEY_LEFT_CTRL,
+	[0x36] = MODIFIERKEY_CTRL,
 	[0x00] = 'a',
 	[0x01] = 's',
 	[0x02] = 'd',
@@ -57,7 +59,7 @@ uint8_t keymap[] = {
 	[0x58] = 230, // 'np6',
 	[0x4e] = 222, // 'np-',
 
-	[0x38] = KEY_LEFT_SHIFT,
+	[0x38] = MODIFIERKEY_SHIFT,
 	[0x06] = 'z',
 	[0x07] = 'x',
 	[0x08] = 'c',

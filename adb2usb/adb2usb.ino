@@ -317,7 +317,9 @@ void loop(void)
 		print_u8(k0);
 		Serial.print(r0 ? '+' : '-');
 
-		uint8_t kc0 = keymap[k0];
+		const uint16_t kc0 = keymap[k0];
+		print_u8(kc0 >> 8);
+		print_u8(kc0 >> 0);
 		if (!kc0)
 			Serial.print('?');
 		else
@@ -331,12 +333,14 @@ void loop(void)
 		{
 			const uint8_t k1 = buf[1] & 0x7F;
 			const uint8_t r1 = buf[1] & 0x80;
+			const uint16_t kc1 = keymap[k1];
 
 			Serial.print(' ');
-			print_u8(k1);
 			Serial.print(r1 ? '+' : '-');
 
-			const uint8_t kc1 = keymap[k1];
+			print_u8(kc1 >> 8);
+			print_u8(kc1 >> 0);
+
 			if (!kc1)
 				Serial.print("?");
 			else
