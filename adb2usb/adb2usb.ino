@@ -22,12 +22,24 @@
 #define ADB_PIN 4
 
 
+#define ADB_CMD_FLUSH	0x01
+#define ADB_CMD_LISTEN	0x08
 #define ADB_CMD_TALK	0x0C
 
 #define ADB_REG_0	0x00
 #define ADB_REG_1	0x01
 #define ADB_REG_2	0x02
 #define ADB_REG_3	0x03
+
+
+static void
+print_u8(
+	uint8_t x
+)
+{
+	Serial.print((x >> 4) & 0xF, HEX);
+	Serial.print((x >> 0) & 0xF, HEX);
+}
 
 
 static void led_state(int x)
@@ -79,14 +91,6 @@ adb_idle(void)
 	adb_drive(1);
 }
 
-
-static void
-adb_reset(void)
-{
-	adb_drive(0);
-	delayMicroseconds(3000);
-	adb_drive(1);
-}
 
 
 static void
@@ -149,7 +153,12 @@ adb_send(
 	// if the line is still held low, SRQ has been asserted by
 	// some device.  do a quick scan to clear it.
 	if (adb_input() == 0)
+	{
+		// wait for the line to come back high
+		while (adb_input() == 0)
+			;
 		return 1;
+	}
 
 	return 0;
 }
@@ -169,7 +178,7 @@ adb_read_byte(void)
 
 		// wait 50 usec, sample
 		trigger_state(0);
-		delayMicroseconds(55);
+		delayMicroseconds(50);
 		const uint8_t bit = adb_input();
 		byte = (byte << 1) | bit;
 
@@ -214,7 +223,7 @@ start_bit:
 
 	// get the start bit
 	trigger_state(1);
-	delayMicroseconds(90);
+	delayMicroseconds(70);
 
 	for (uint8_t i = 0 ; i < len ; i++)
 		buf[i] = adb_read_byte();
@@ -225,6 +234,29 @@ start_bit:
 	return 1;
 }
 
+
+static void
+adb_reset(void)
+{
+	adb_drive(0);
+	delayMicroseconds(3000);
+	adb_drive(1);
+	delayMicroseconds(3000);
+
+	// Tell all devices to reset
+	for (uint8_t dev = 0 ; dev < 16 ; dev++)
+	{
+		adb_send((dev << 4) | ADB_CMD_FLUSH);
+		delayMicroseconds(10000);
+	}
+
+	// And attempt to clear any SRQ
+	for (uint8_t dev = 0 ; dev < 16 ; dev++)
+	{
+		adb_send((dev << 4) | ADB_CMD_TALK | ADB_REG_0);
+		delayMicroseconds(10000);
+	}
+}
 
 
 void setup(void)
@@ -243,38 +275,8 @@ void setup(void)
 	delayMicroseconds(10000);
 
 
-	// clear srq
-	for (uint8_t dev = 0 ; dev < 16 ; dev++)
-	{
-		adb_send((dev << 4) | ADB_CMD_TALK | ADB_REG_0);
-		delay(10);
-	}
-
-#if 0
-	// Find the mouse address
-	uint8_t resp[2];
-	uint8_t len;
-	adb_send((0x3<<4) | ADB_CMD_TALK | ADB_REG3);
-	len = adb_read(resp, 2);
-#endif
-}
-
-
-static void
-print_u8(
-	uint8_t x
-)
-{
-	Serial.print((x >> 4) & 0xF, HEX);
-	Serial.print((x >> 0) & 0xF, HEX);
-}
-
-
-void loop(void)
-{
-	uint8_t buf[2];
-
 	Serial.println("scanning");
+	uint8_t buf[2];
 	for(uint8_t i = 0 ; i < 16 ; i++)
 	{
 		delay(1);
@@ -287,11 +289,57 @@ void loop(void)
 		print_u8(buf[0]);
 		print_u8(buf[1]);
 		Serial.println();
-
-/*
-		while (Serial.available() == 0)
-			;
-		Serial.read();
-*/
 	}
+}
+
+
+void loop(void)
+{
+	uint8_t buf[2];
+
+	// read from the keyboard
+	adb_send(0x2C);
+	if (adb_read(buf, 2))
+	{
+		Serial.print("K:");
+		print_u8(buf[0]);
+		print_u8(buf[1]);
+		Serial.println();
+	}
+	delayMicroseconds(3000);
+
+	// Poll the mouse
+	adb_send(0x3C);
+	if (adb_read(buf, 2))
+	{
+		uint16_t ev = (buf[0] << 8) | buf[1];
+
+		// parsing EM85000 datasheet
+		// 15: !M main mouse button
+		// 14-8: signed 7-bit value (positive is up)
+		//  7: !R right mouse button
+		// 6-0: signed 7-bit value (positive is right)
+		uint8_t m1 = (buf[0] & 0x80) ? 0 : 1;
+		uint8_t m2 = (buf[1] & 0x80) ? 0 : 1;
+		int8_t dx = buf[0] & 0x7F;
+		int8_t dy = buf[1] & 0x7F;
+
+		// sign extend dx and dy
+		dx |= (dx & 0x40) << 1;
+		dy |= (dy & 0x40) << 1;
+
+		Serial.print("M:");
+		print_u8(buf[0]);
+		print_u8(buf[1]);
+		Serial.print(' ');
+		Serial.print(dx);
+		Serial.print(' ');
+		Serial.print(dy);
+		Serial.print(' ');
+		Serial.print(m1);
+		Serial.print(m2);
+		Serial.println();
+	}
+
+	delayMicroseconds(3000);
 }
